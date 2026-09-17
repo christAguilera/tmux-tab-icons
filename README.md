@@ -2,6 +2,8 @@
 
 Replaces `:text:` placeholders in tmux window names with glyphs (e.g. Nerd Font icons) using regex rules from a file.
 
+![tmux status bar with icons in window names](docs/example.png)
+
 The plugin builds a native tmux format (`#{s|:(regex):|glyph|:#{window_name}}`, nested once per rule) and stores it in `@tab_icons_window_name`. tmux evaluates it on every render: no shell processes per refresh, windows are never renamed and `automatic-rename` keeps working.
 
 ## Installation
