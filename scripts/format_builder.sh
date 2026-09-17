@@ -1,22 +1,25 @@
 #!/usr/bin/env bash
 
-# Reads parsed records from stdin and prints a tmux format that applies every rule, in
-# order, to the given format variable. The first rule ends up as the innermost substitution.
+# Prints the regex that matches a rule's regex wrapped in colons (e.g. `:(n?vim):`).
+placeholder_pattern() {
+  printf '%s%s%s' "$TAB_ICONS_PLACEHOLDER_PREFIX" "$1" "$TAB_ICONS_PLACEHOLDER_SUFFIX"
+}
+
+# Reads parsed records from stdin and prints a tmux format that replaces every placeholder,
+# in order, in the given format variable. The first rule ends up as the innermost substitution.
 build_format() {
   local source_variable="$1"
   local flags="$2"
   local format="#{${source_variable}}"
-  local pattern glyph separator
-  while IFS="$TAB_ICONS_FIELD_SEPARATOR" read -r pattern glyph; do
-    if has_unsupported_chars "${pattern}${glyph}"; then
-      warn "skipping '${pattern}': '${TAB_ICONS_UNSUPPORTED_CHARS}' is not supported in tmux formats"
-      continue
-    fi
+  local regex glyph pattern separator
+  while IFS="$TAB_ICONS_FIELD_SEPARATOR" read -r regex glyph; do
+    pattern="$(escape_format_argument "$(placeholder_pattern "$regex")")"
+    glyph="$(escape_format_argument "$glyph")"
     if ! separator="$(pick_separator "$pattern" "$glyph")"; then
-      warn "skipping '${pattern}': it contains every separator in '${TAB_ICONS_SEPARATOR_CANDIDATES}'"
+      warn "skipping '${regex}': it contains every separator in '${TAB_ICONS_SEPARATOR_CANDIDATES}'"
       continue
     fi
-    format="#{s${separator}$(escape_format_argument "$pattern")${separator}$(escape_format_argument "$glyph")${separator}${flags}:${format}}"
+    format="#{s${separator}${pattern}${separator}${glyph}${separator}${flags}:${format}}"
   done
   printf '%s\n' "$format"
 }

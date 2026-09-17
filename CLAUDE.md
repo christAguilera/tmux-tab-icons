@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A TPM plugin (pure Bash) that replaces regex matches in tmux window names with glyphs. User-facing docs, options and the mappings file syntax are in `README.md`.
+A TPM plugin (pure Bash) that replaces `:text:` placeholders matching regex rules in tmux window names with glyphs. User-facing docs, options and the mappings file syntax are in `README.md`.
 
 ## Commands
 
@@ -33,7 +33,7 @@ Pipeline, orchestrated by `tab_icons.tmux` (no logic of its own):
 
 1. `scripts/tmux_options.sh` reads `@tab_icons_*` options. It is the **only** module that calls `tmux`; every other module is a pure stdin/args → stdout function so it can be unit-tested without tmux.
 2. `scripts/mappings_parser.sh` turns the mappings file into records `<regex>\x1f<glyph>` (separator is `TAB_ICONS_FIELD_SEPARATOR`).
-3. `scripts/format_builder.sh` folds the records into `#{s<sep><regex><sep><glyph><sep><flags>:<previous>}`, starting from `#{<source variable>}`; the first rule is the innermost.
+3. `scripts/format_builder.sh` folds the records into `#{s<sep>:(<regex>):<sep><glyph><sep><flags>:<previous>}`, starting from `#{<source variable>}`; the first rule is the innermost.
 4. `scripts/format_escape.sh` escapes arguments and picks `<sep>` per rule.
 5. The result is stored in `@tab_icons_window_name`. Problems are written to stderr via `warn` (`scripts/logging.sh`), collected by the entry point and shown in a single `display-message`.
 
@@ -45,8 +45,9 @@ Modifier arguments are format-expanded by tmux, so:
 
 - `#` → `##` (must be escaped first; also prevents `#(...)` command execution), `,` → `#,`, `}` → `#}`. `{` needs no escape.
 - The argument separator cannot be escaped, so a separator not present in the rule is chosen from `TAB_ICONS_SEPARATOR_CANDIDATES`. Valid separators are punctuation other than `-`, `;`, `:`, `#`, `{`, `}` and `,`.
-- `:` cannot appear in arguments at all (`#:` does not work), so those rules are rejected.
+- `:` cannot appear literally in arguments (`#:` does not work either), so it is written as `#{a:58}`, which expands to `:`.
 - `\|` does not match a literal `|`; use `[|]`.
+- `##` directly followed by `,` or `}` loses the `#` (e.g. `###,` renders `,`).
 
 When changing escaping, re-verify with `tmux -L <socket> display -p '<format>'` and cover it in `tests/tab_icons.bats`.
 

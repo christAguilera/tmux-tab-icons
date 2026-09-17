@@ -10,8 +10,8 @@ setup() {
   run parse_mappings < "$FIXTURES_DIR/icons.conf"
   [ "$status" -eq 0 ]
   [ "${#lines[@]}" -eq 3 ]
-  [ "${lines[0]}" = "nvim${SEP}${GLYPH_VIM}" ]
-  [ "${lines[1]}" = "^(zsh|bash)\$${SEP}${GLYPH_SHELL}" ]
+  [ "${lines[0]}" = "n?vim${SEP}${GLYPH_VIM}" ]
+  [ "${lines[1]}" = "zsh|bash${SEP}${GLYPH_SHELL}" ]
 }
 
 @test "keeps spaces inside the regex and uses the last token as glyph" {
@@ -25,7 +25,7 @@ setup() {
 }
 
 @test "warns and skips lines without a glyph" {
-  run --separate-stderr parse_mappings <<< $'nvim\nzsh '"$GLYPH_SHELL"
+  run --separate-stderr parse_mappings <<< $'vim\nzsh '"$GLYPH_SHELL"
   [ "$output" = "zsh${SEP}${GLYPH_SHELL}" ]
   [[ "$stderr" == *"line 1:"* ]]
 }

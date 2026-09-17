@@ -1,8 +1,8 @@
 # tmux-tab-icons
 
-Replaces parts of tmux window names with glyphs (e.g. Nerd Font icons) using regex rules from a file.
+Replaces `:text:` placeholders in tmux window names with glyphs (e.g. Nerd Font icons) using regex rules from a file.
 
-The plugin builds a native tmux format (`#{s|regex|glyph|:#{window_name}}`, nested once per rule) and stores it in `@tab_icons_window_name`. tmux evaluates it on every render: no shell processes per refresh, windows are never renamed and `automatic-rename` keeps working.
+The plugin builds a native tmux format (`#{s|:(regex):|glyph|:#{window_name}}`, nested once per rule) and stores it in `@tab_icons_window_name`. tmux evaluates it on every render: no shell processes per refresh, windows are never renamed and `automatic-rename` keeps working.
 
 ## Installation
 
@@ -36,14 +36,18 @@ One rule per line: `<regex> <glyph>`. See [`examples/icons.conf`](examples/icons
 ```
 # Comments and blank lines are ignored
 n?vim 
-^(zsh|bash|fish)$ 
+zsh|bash|fish 
 docker compose 
 ```
 
+With these rules, a window named `:nvim: main.go` is shown as ` main.go`.
+
 - The **last** whitespace-separated token is the glyph; everything before it is the regex, so the regex may contain spaces.
-- Regexes are POSIX extended (what tmux uses). Every match is replaced, not only the first.
-- Rules apply top to bottom, each on the output of the previous one.
-- `:` cannot be used in regexes or glyphs (tmux formats cannot represent it); those rules are skipped with a warning.
+- Regexes are POSIX extended (what tmux uses) and match the text between colons: `n?vim` turns `:vim:` and `:nvim:` into the glyph, but not `vim` or `:xvim:`.
+- Every placeholder is replaced, not only the first. Rules apply top to bottom, each on the output of the previous one.
+- Avoid regexes that can match `:` (e.g. `.*`), since they can span several placeholders; use `[^:]*` instead.
+- Matching is case-sensitive unless `@tab_icons_flags` is `i`.
+- Rename windows with the placeholder, e.g. `tmux rename-window ':vim: main.go'`.
 - Changes take effect when the plugin runs again (e.g. reloading `tmux.conf`).
 
 ## Options

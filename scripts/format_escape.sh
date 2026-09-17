@@ -8,14 +8,8 @@ escape_format_argument() {
   value="${value//"$hash"/"$hash$hash"}"
   value="${value//"$comma"/"$hash$comma"}"
   value="${value//"$closing_brace"/"$hash$closing_brace"}"
+  value="${value//"$TAB_ICONS_COLON"/"$TAB_ICONS_COLON_FORMAT"}"
   printf '%s' "$value"
-}
-
-has_unsupported_chars() {
-  case "$1" in
-    *["$TAB_ICONS_UNSUPPORTED_CHARS"]*) return 0 ;;
-  esac
-  return 1
 }
 
 # Prints the first separator candidate not contained in any of the given values.

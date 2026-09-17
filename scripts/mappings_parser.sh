@@ -9,7 +9,7 @@ is_ignorable_line() {
 # <regex><TAB_ICONS_FIELD_SEPARATOR><glyph>. The glyph is the last whitespace-separated
 # token, so the regex may contain spaces. Malformed lines are reported and skipped.
 parse_mappings() {
-  local line trimmed pattern glyph
+  local line trimmed regex glyph
   local line_number=0
   while IFS= read -r line || [ -n "$line" ]; do
     line_number=$((line_number + 1))
@@ -18,11 +18,11 @@ parse_mappings() {
       continue
     fi
     glyph="${trimmed##*[[:space:]]}"
-    pattern="$(trim "${trimmed%"$glyph"}")"
-    if [ -z "$pattern" ]; then
+    regex="$(trim "${trimmed%"$glyph"}")"
+    if [ -z "$regex" ]; then
       warn "line ${line_number}: expected '<regex> <glyph>', got '${trimmed}'"
       continue
     fi
-    printf '%s%s%s\n' "$pattern" "$TAB_ICONS_FIELD_SEPARATOR" "$glyph"
+    printf '%s%s%s\n' "$regex" "$TAB_ICONS_FIELD_SEPARATOR" "$glyph"
   done
 }

@@ -21,10 +21,9 @@ setup() {
   [ "$output" = '^(a|b)[0-9]+{2#}$' ]
 }
 
-@test "detects unsupported characters" {
-  run has_unsupported_chars 'a:b'
-  [ "$status" -eq 0 ]
-  run ! has_unsupported_chars 'ab'
+@test "writes colons as a format that expands to them" {
+  run escape_format_argument 'a:b#:'
+  [ "$output" = 'a#{a:58}b###{a:58}' ]
 }
 
 @test "picks the first separator absent from every value" {
