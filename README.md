@@ -9,7 +9,7 @@ The plugin builds a native tmux format (`#{s|:(regex):|glyph|:#{window_name}}`, 
 With [TPM](https://github.com/tmux-plugins/tpm):
 
 ```tmux
-set -g @plugin 'jchrisnavarro/tmux-tab-icons'
+set -g @plugin 'christAguilera/tmux-tab-icons'
 ```
 
 Manually:
